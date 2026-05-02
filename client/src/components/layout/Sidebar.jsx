@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   BookOpen,
@@ -6,8 +7,13 @@ import {
   CheckSquare,
   GraduationCap,
   X,
+  Globe,
+  Lock,
+  Copy,
 } from "lucide-react";
 import useAuthStore from "../../stores/authStore";
+import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -18,7 +24,35 @@ const links = [
 ];
 
 export default function Sidebar({ open, onClose }) {
-  const { user, logout } = useAuthStore();
+  const { user, setAuth, logout } = useAuthStore();
+  const [isPublic, setIsPublic] = useState(user?.isPublic ?? false);
+  const [toggling, setToggling] = useState(false);
+
+  const handleVisibilityToggle = async () => {
+    setToggling(true);
+    try {
+      const { data } = await api.put("/profile/visibility", {
+        isPublic: !isPublic,
+      });
+      setIsPublic(data.isPublic);
+      // Update stored user object
+      const updated = { ...user, isPublic: data.isPublic };
+      setAuth(updated, localStorage.getItem("token"));
+      toast.success(
+        data.isPublic ? "Profile is now public" : "Profile is now private",
+      );
+    } catch {
+      toast.error("Failed to update visibility");
+    } finally {
+      setToggling(false);
+    }
+  };
+
+  const copyProfileLink = () => {
+    const url = `${window.location.origin}/u/${user._id}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Profile link copied!");
+  };
 
   return (
     <aside
@@ -30,7 +64,7 @@ export default function Sidebar({ open, onClose }) {
       ${open ? "translate-x-0" : "-translate-x-full"}
     `}
     >
-      {/* Logo + close btn */}
+      {/* Logo */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
@@ -48,7 +82,7 @@ export default function Sidebar({ open, onClose }) {
         </button>
       </div>
 
-      {/* Nav links */}
+      {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {links.map(({ to, label, icon: Icon, end }) => (
           <NavLink
@@ -72,13 +106,14 @@ export default function Sidebar({ open, onClose }) {
         ))}
       </nav>
 
-      {/* User + logout */}
-      <div className="px-4 py-4 border-t border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-semibold">
+      {/* User section */}
+      <div className="px-4 py-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
+        {/* User info */}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
             {user?.name?.charAt(0).toUpperCase()}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
               {user?.name}
             </p>
@@ -87,6 +122,49 @@ export default function Sidebar({ open, onClose }) {
             </p>
           </div>
         </div>
+
+        {/* Public profile toggle */}
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isPublic ? (
+                <Globe size={14} className="text-emerald-500" />
+              ) : (
+                <Lock size={14} className="text-gray-400" />
+              )}
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                {isPublic ? "Profile is public" : "Profile is private"}
+              </span>
+            </div>
+
+            {/* Toggle switch */}
+            <button
+              onClick={handleVisibilityToggle}
+              disabled={toggling}
+              className={`relative w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none ${
+                isPublic ? "bg-emerald-500" : "bg-gray-300 dark:bg-gray-600"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
+                  isPublic ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Copy link — only when public */}
+          {isPublic && (
+            <button
+              onClick={copyProfileLink}
+              className="flex items-center gap-1.5 text-xs text-primary-500 hover:text-primary-600 font-medium transition-colors"
+            >
+              <Copy size={12} /> Copy profile link
+            </button>
+          )}
+        </div>
+
+        {/* Logout */}
         <button
           onClick={logout}
           className="w-full text-left text-sm text-red-500 hover:text-red-600 font-medium px-2 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
