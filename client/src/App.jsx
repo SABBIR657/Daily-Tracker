@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import useAuthStore from "./stores/authStore";
 import Layout from "./components/layout/Layout";
 import Login from "./pages/Login";
@@ -18,33 +16,6 @@ const PrivateRoute = ({ children }) => {
 };
 
 export default function App() {
-  const { token, logout } = useAuthStore();
-
-  // Set auto-logout timer based on token expiry
-  useEffect(() => {
-    if (!token) return;
-
-    try {
-      const { exp } = jwtDecode(token);
-      const expiresIn = exp * 1000 - Date.now(); // ms until expiry
-
-      if (expiresIn <= 0) {
-        logout();
-        return;
-      }
-
-      // Set a timer to log out exactly when token expires
-      const timer = setTimeout(() => {
-        logout();
-        window.location.href = "/login";
-      }, expiresIn);
-
-      return () => clearTimeout(timer); // cleanup on unmount
-    } catch {
-      logout();
-    }
-  }, [token]);
-
   return (
     <BrowserRouter>
       <Routes>
