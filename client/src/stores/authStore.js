@@ -1,8 +1,26 @@
 import { create } from 'zustand';
+import { isTokenExpired } from '../utils/tokenUtils';
+
+// Check token validity on store init
+const getInitialState = () => {
+  const token = localStorage.getItem('token');
+  const user  = localStorage.getItem('user');
+
+  if (!token || isTokenExpired(token)) {
+    // Clear stale data immediately
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return { user: null, token: null };
+  }
+
+  return {
+    user:  user ? JSON.parse(user) : null,
+    token,
+  };
+};
 
 const useAuthStore = create((set) => ({
-  user:  JSON.parse(localStorage.getItem('user')) || null,
-  token: localStorage.getItem('token') || null,
+  ...getInitialState(),
 
   setAuth: (user, token) => {
     localStorage.setItem('user',  JSON.stringify(user));
