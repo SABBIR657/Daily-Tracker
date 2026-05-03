@@ -1,8 +1,7 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const Vocabulary = require('../models/Vocabulary');
-const dayjs = require('dayjs');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const generateVocabulary = async (date, difficulty) => {
   const difficultyGuide = {
@@ -47,9 +46,13 @@ Respond with ONLY a valid JSON object in this exact format, no markdown, no extr
   ]
 }`;
 
- const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-  const result = await model.generateContent(prompt);
-  const text   = result.response.text().trim();
+  const response = await client.chat.completions.create({
+    model:      'llama3-8b-8192',
+    max_tokens: 4000,
+    messages:   [{ role: 'user', content: prompt }],
+  });
+
+  const text   = response.choices[0].message.content.trim();
   const clean  = text.replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(clean);
 
