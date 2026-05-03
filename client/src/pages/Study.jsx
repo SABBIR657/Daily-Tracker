@@ -57,11 +57,15 @@ export default function Study() {
   });
 
   const onSubmit = (data) => {
+    // Parse date as local time, not UTC
+    const [year, month, day] = data.date.split("-");
+    const localDate = new Date(year, month - 1, day, 12, 0, 0); // noon local time
+
     addLog({
       ...data,
       type: "study",
       duration: Number(data.duration),
-      date: new Date(data.date).toISOString(), // ✅ send full ISO string
+      date: localDate.toISOString(),
     });
   };
 

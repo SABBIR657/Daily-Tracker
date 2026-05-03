@@ -91,10 +91,14 @@ export default function Physical() {
   });
 
   const onSubmit = (data) => {
+    // Parse date as local time, not UTC
+    const [year, month, day] = data.date.split("-");
+    const localDate = new Date(year, month - 1, day, 12, 0, 0); // noon local time
+
     const payload = {
       type: data.type,
       duration: Number(data.duration),
-      date: new Date(data.date).toISOString(), // ✅ send full ISO string
+      date: localDate.toISOString(),
       notes: data.notes,
     };
 
