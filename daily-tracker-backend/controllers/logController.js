@@ -114,13 +114,17 @@ const getAnalytics = async (req, res) => {
   try {
     const { period = 'week' } = req.query;
 
+    // Use end of today (23:59:59) as the upper bound
     const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
     const startDate = new Date();
 
-    if (period === 'week')  startDate.setDate(now.getDate() - 7);
-    if (period === 'month') startDate.setMonth(now.getMonth() - 1);
-    if (period === 'year')  startDate.setFullYear(now.getFullYear() - 1);
+    if (period === 'week')  startDate.setDate(startDate.getDate() - 7);
+    if (period === 'month') startDate.setMonth(startDate.getMonth() - 1);
+    if (period === 'year')  startDate.setFullYear(startDate.getFullYear() - 1);
 
+    // Start from beginning of that day
     startDate.setHours(0, 0, 0, 0);
 
     const logs = await Log.find({
@@ -147,7 +151,7 @@ const getAnalytics = async (req, res) => {
       workoutLogs.map(l => new Date(l.date).toDateString())
     ).size;
 
-    // Activity heatmap data (date -> total minutes)
+    // Heatmap
     const heatmap = logs.reduce((acc, l) => {
       const day = new Date(l.date).toISOString().split('T')[0];
       acc[day] = (acc[day] || 0) + l.duration;
@@ -157,17 +161,17 @@ const getAnalytics = async (req, res) => {
     res.json({
       period,
       study: {
-        totalHours: Math.round(studyHours * 10) / 10,
+        totalHours:    Math.round(studyHours * 10) / 10,
         totalSessions: studyLogs.length,
-        bySubject: studyBySubject,
+        bySubject:     studyBySubject,
       },
       run: {
-        totalKm: Math.round(totalKm * 10) / 10,
+        totalKm:       Math.round(totalKm * 10) / 10,
         totalSessions: runLogs.length,
-        totalMinutes: totalRunMinutes,
+        totalMinutes:  totalRunMinutes,
       },
       workout: {
-        totalDays: workoutDays,
+        totalDays:     workoutDays,
         totalSessions: workoutLogs.length,
       },
       heatmap,

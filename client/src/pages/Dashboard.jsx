@@ -34,6 +34,7 @@ export default function Dashboard() {
   const { data: analytics, isLoading: loadingAnalytics } = useQuery({
     queryKey: ["analytics", period],
     queryFn: () => getAnalytics(period).then((r) => r.data),
+    staleTime: 0, // always refetch when switching to dashboard
   });
 
   const { data: todoSummary } = useQuery({
