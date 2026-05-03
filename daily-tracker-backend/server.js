@@ -22,6 +22,7 @@ app.use('/api/logs',     require('./routes/logs'));
 app.use('/api/todos',    require('./routes/todos'));
 app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/profile',  require('./routes/profile'));
+app.use('/api/vocabulary', require('./routes/vocabulary'));
 
 // Health check
 app.get('/', (req, res) => {

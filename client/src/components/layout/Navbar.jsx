@@ -8,6 +8,7 @@ const titles = {
   "/physical": "Physical Tracker",
   "/todos": "To-Do List",
   "/subjects": "Subjects & Syllabus",
+  "/vocabulary": "Vocabulary",
 };
 
 export default function Navbar({ onMenuClick }) {

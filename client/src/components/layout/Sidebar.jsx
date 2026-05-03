@@ -6,6 +6,7 @@ import {
   Dumbbell,
   CheckSquare,
   GraduationCap,
+  BookMarked,
   X,
   Globe,
   Lock,
@@ -21,6 +22,7 @@ const links = [
   { to: "/physical", label: "Physical", icon: Dumbbell },
   { to: "/todos", label: "To-Do", icon: CheckSquare },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
+  { to: '/vocabulary',  label: 'Vocabulary', icon: BookMarked },
 ];
 
 export default function Sidebar({ open, onClose }) {
