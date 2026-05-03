@@ -47,12 +47,9 @@ Respond with ONLY a valid JSON object in this exact format, no markdown, no extr
   ]
 }`;
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }); // free tier model
-
+  const model  = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   const result = await model.generateContent(prompt);
   const text   = result.response.text().trim();
-
-  // Strip markdown fences if present
   const clean  = text.replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(clean);
 
