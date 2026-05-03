@@ -39,6 +39,7 @@ export default function Study() {
       toast.success("Study session logged!");
       queryClient.invalidateQueries({ queryKey: ["logs"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["recentLogs"] });
       reset({ date: dayjs().format("YYYY-MM-DD") });
       setShowForm(false);
     },
@@ -60,6 +61,7 @@ export default function Study() {
       ...data,
       type: "study",
       duration: Number(data.duration),
+      date: new Date(data.date).toISOString(), // ✅ send full ISO string
     });
   };
 

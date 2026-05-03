@@ -121,6 +121,8 @@ const getAnalytics = async (req, res) => {
     if (period === 'month') startDate.setMonth(now.getMonth() - 1);
     if (period === 'year')  startDate.setFullYear(now.getFullYear() - 1);
 
+    startDate.setHours(0, 0, 0, 0);
+
     const logs = await Log.find({
       user: req.user._id,
       date: { $gte: startDate, $lte: now },

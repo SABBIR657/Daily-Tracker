@@ -69,6 +69,7 @@ export default function Physical() {
       toast.success("Activity logged!");
       queryClient.invalidateQueries({ queryKey: ["logs"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["recentLogs"] });
       reset({
         type: "run",
         date: dayjs().format("YYYY-MM-DD"),
@@ -93,7 +94,7 @@ export default function Physical() {
     const payload = {
       type: data.type,
       duration: Number(data.duration),
-      date: data.date,
+      date: new Date(data.date).toISOString(), // ✅ send full ISO string
       notes: data.notes,
     };
 
