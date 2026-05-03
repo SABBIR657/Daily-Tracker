@@ -60,13 +60,17 @@ const getMe = async (req, res) => {
 // PUT /api/auth/goals  — update weekly goals
 const updateGoals = async (req, res) => {
   try {
+    const { studyHours, workoutDays, runKm } = req.body;
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { goals: req.body },
+      {
+        goals: { studyHours, workoutDays, runKm }
+      },
       { new: true, runValidators: true }
     ).select('-password');
 
-    res.json(user);
+    res.json({ goals: user.goals });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

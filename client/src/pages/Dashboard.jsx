@@ -5,7 +5,7 @@ import {
   Dumbbell,
   Footprints,
   CheckSquare,
-  AlertCircle,
+  Settings,
 } from "lucide-react";
 import {
   BarChart,
@@ -17,17 +17,18 @@ import {
   Cell,
 } from "recharts";
 import dayjs from "dayjs";
-import { getAnalytics } from "../api/logs";
+import { getAnalytics, getLogs } from "../api/logs";
 import { getTodoSummary } from "../api/todos";
-import { getLogs } from "../api/logs";
 import useAuthStore from "../stores/authStore";
 import StatCard from "../components/ui/StatCard";
 import Heatmap from "../components/charts/Heatmap";
+import GoalsModal from "../components/ui/GoalsModal";
 
 const PERIODS = ["week", "month", "year"];
 
 export default function Dashboard() {
   const [period, setPeriod] = useState("week");
+  const [showGoals, setShowGoals] = useState(false); // ✅ moved inside component
   const user = useAuthStore((s) => s.user);
 
   const { data: analytics, isLoading: loadingAnalytics } = useQuery({
@@ -40,13 +41,11 @@ export default function Dashboard() {
     queryFn: () => getTodoSummary(period).then((r) => r.data),
   });
 
-  // Last 7 recent logs for activity feed
   const { data: recentLogs } = useQuery({
     queryKey: ["recentLogs"],
     queryFn: () => getLogs({ limit: 7 }).then((r) => r.data),
   });
 
-  // Build bar chart data from bySubject
   const subjectChartData = analytics
     ? Object.entries(analytics.study.bySubject).map(([name, mins]) => ({
         name,
@@ -66,6 +65,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Goals Modal */}
+      {showGoals && <GoalsModal onClose={() => setShowGoals(false)} />}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -77,21 +79,32 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Period selector */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 self-start">
-          {PERIODS.map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium capitalize transition-colors ${
-                period === p
-                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 self-start">
+          {/* Goals button */}
+          <button
+            onClick={() => setShowGoals(true)}
+            className="btn-secondary flex items-center gap-2 text-sm"
+          >
+            <Settings size={15} />
+            Set goals
+          </button>
+
+          {/* Period selector */}
+          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+            {PERIODS.map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium capitalize transition-colors ${
+                  period === p
+                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -130,9 +143,18 @@ export default function Dashboard() {
       {/* Goals vs Actuals */}
       {user?.goals && (
         <div className="card">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-            Goals vs Actuals ({period})
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Goals vs Actuals ({period})
+            </h3>
+            <button
+              onClick={() => setShowGoals(true)}
+              className="text-xs text-primary-500 hover:text-primary-600 font-medium flex items-center gap-1 transition-colors"
+            >
+              <Settings size={12} />
+              Edit goals
+            </button>
+          </div>
           <div className="space-y-3">
             <GoalBar
               label="Study"
@@ -161,7 +183,6 @@ export default function Dashboard() {
 
       {/* Study by subject chart + Recent activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Subject breakdown */}
         <div className="card">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
             Study by subject
@@ -200,7 +221,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Recent activity feed */}
         <div className="card">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
             Recent activity
