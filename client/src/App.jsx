@@ -10,6 +10,7 @@ import Todos from "./pages/Todos";
 import Subjects from "./pages/Subjects";
 import PublicProfile from "./pages/PublicProfile";
 import Vocabulary from "./pages/Vocabulary";
+import Revision from "./pages/Revision";
 
 const PrivateRoute = ({ children }) => {
   const token = useAuthStore((s) => s.token);
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="physical" element={<Physical />} />
           <Route path="todos" element={<Todos />} />
           <Route path="subjects" element={<Subjects />} />
+          <Route path="revision" element={<Revision />} />
           <Route path="vocabulary" element={<Vocabulary />} />
         </Route>
       </Routes>

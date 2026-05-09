@@ -11,10 +11,12 @@ import {
   Globe,
   Lock,
   Copy,
+  RotateCcw
 } from "lucide-react";
 import useAuthStore from "../../stores/authStore";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
+
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -22,6 +24,7 @@ const links = [
   { to: "/physical", label: "Physical", icon: Dumbbell },
   { to: "/todos", label: "To-Do", icon: CheckSquare },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
+  { to: '/revision', label: 'Revision', icon: RotateCcw },
   { to: '/vocabulary',  label: 'Vocabulary', icon: BookMarked },
 ];
 

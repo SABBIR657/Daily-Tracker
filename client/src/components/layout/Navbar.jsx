@@ -8,6 +8,7 @@ const titles = {
   "/physical": "Physical Tracker",
   "/todos": "To-Do List",
   "/subjects": "Subjects & Syllabus",
+  "/revision": "Revision Tracker",
   "/vocabulary": "Vocabulary",
 };
 
