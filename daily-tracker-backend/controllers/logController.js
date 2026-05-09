@@ -115,17 +115,30 @@ const getAnalytics = async (req, res) => {
     const { period = 'week' } = req.query;
 
     // Use end of today (23:59:59) as the upper bound
-    const now = new Date();
-    now.setHours(23, 59, 59, 999);
+const now = new Date();
+now.setHours(23, 59, 59, 999);
 
-    const startDate = new Date();
+const startDate = new Date();
 
-    if (period === 'week')  startDate.setDate(startDate.getDate() - 7);
-    if (period === 'month') startDate.setMonth(startDate.getMonth() - 1);
-    if (period === 'year')  startDate.setFullYear(startDate.getFullYear() - 1);
+if (period === 'week') {
+  // Fixed Monday–Sunday week
+  const day = startDate.getDay(); // 0=Sun, 1=Mon...
+  const diff = day === 0 ? 6 : day - 1; // days since last Monday
+  startDate.setDate(startDate.getDate() - diff);
+  startDate.setHours(0, 0, 0, 0);
+}
 
-    // Start from beginning of that day
-    startDate.setHours(0, 0, 0, 0);
+if (period === 'month') {
+  // First day of current month
+  startDate.setDate(1);
+  startDate.setHours(0, 0, 0, 0);
+}
+
+if (period === 'year') {
+  // Jan 1 of current year
+  startDate.setMonth(0, 1);
+  startDate.setHours(0, 0, 0, 0);
+}
 
     const logs = await Log.find({
       user: req.user._id,
