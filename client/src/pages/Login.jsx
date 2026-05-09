@@ -108,6 +108,13 @@ export default function Login() {
             Create one
           </Link>
         </p>
+        <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6">
+          Built by{" "}
+          <span className="font-medium text-gray-500 dark:text-gray-400">
+           <a href="https://www.linkedin.com/in/sabbir-rahman-9a077620b/" className="no-underline">Sabbir Rahman</a> 
+          </span>{" "}
+          · Daily Tracker © {new Date().getFullYear()}
+        </p>
       </div>
     </div>
   );
