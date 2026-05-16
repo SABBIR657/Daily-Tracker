@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { BookOpen, Plus, Trash2, Clock, X } from "lucide-react";
@@ -9,11 +9,15 @@ import { getSubjects } from "../api/subjects";
 import Badge from "../components/ui/Badge";
 import { RotateCcw } from "lucide-react";
 import { getDueRevisions } from "../api/revisions";
+import { Timer } from "lucide-react";
+import PomodoroTimer from "../components/ui/PomodoroTimer";
 
 export default function Study() {
   const [showForm, setShowForm] = useState(false);
   const [studyTab, setStudyTab] = useState("logs");
   const queryClient = useQueryClient();
+  const [showPomodoro, setShowPomodoro] = useState(false);
+  const [pomodoroData, setPomodoroData] = useState(null);
 
   const { data: dueRevisions = [] } = useQuery({
     queryKey: ["revisions", "due"],
@@ -28,6 +32,17 @@ export default function Study() {
   } = useForm({
     defaultValues: { date: dayjs().format("YYYY-MM-DD") },
   });
+
+  useEffect(() => {
+    if (pomodoroData) {
+      reset({
+        date: dayjs().format("YYYY-MM-DD"),
+        duration: pomodoroData.duration,
+      });
+      setPomodoroData(null);
+      setShowForm(true);
+    }
+  }, [pomodoroData]);
 
   // Fetch study logs only
   const { data: logs = [], isLoading } = useQuery({
@@ -97,14 +112,35 @@ export default function Study() {
             {logs.length} sessions logged
           </p>
         </div>
+        {/* Pomodoro Timer */}
+        {showPomodoro && studyTab === "logs" && (
+          <PomodoroTimer
+            onClose={() => setShowPomodoro(false)}
+            onSessionComplete={(minutes) => {
+              setPomodoroData({ duration: minutes });
+              setShowPomodoro(false);
+            }}
+          />
+        )}
         {studyTab === "logs" && (
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="btn-primary flex items-center gap-2"
-          >
-            {showForm ? <X size={16} /> : <Plus size={16} />}
-            {showForm ? "Cancel" : "Log session"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowPomodoro((v) => !v)}
+              className={`btn-secondary flex items-center gap-2 ${
+                showPomodoro ? "ring-2 ring-primary-500" : ""
+              }`}
+            >
+              <Timer size={15} />
+              Pomodoro
+            </button>
+            <button
+              onClick={() => setShowForm((v) => !v)}
+              className="btn-primary flex items-center gap-2"
+            >
+              {showForm ? <X size={16} /> : <Plus size={16} />}
+              {showForm ? "Cancel" : "Log session"}
+            </button>
+          </div>
         )}
       </div>
 
